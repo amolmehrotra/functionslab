@@ -1,0 +1,325 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "defaultValue": "[resourceGroup().location]",
+            "type": "String"
+        },
+        "alias": {
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Network/VirtualNetworks",
+            "apiVersion": "2021-01-01",
+            "name": "VNET1",
+            "location": "[parameters('location')]",
+            "dependsOn": [],
+            "tags": {},
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.1.0.0/16"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "default",
+                        "properties": {
+                            "addressPrefix": "10.1.0.0/24"
+                        }
+                    },
+                    {
+                        "name": "webappsubnet",
+                        "properties": {
+                            "addressPrefix": "10.1.1.0/24"
+                        }
+                    },
+                    {
+                        "name": "PEsubnet",
+                        "properties": {
+                            "addressPrefix": "10.1.2.0/24"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/VirtualNetworks",
+            "apiVersion": "2021-01-01",
+            "name": "VNET2",
+            "location": "[parameters('location')]",
+            "dependsOn": [],
+            "tags": {},
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.2.0.0/16"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "default",
+                        "properties": {
+                            "addressPrefix": "10.2.0.0/24"
+                        }
+                    },
+                    {
+                        "name": "functionappsubnet",
+                        "properties": {
+                            "addressPrefix": "10.2.1.0/24"
+                        }
+                    },
+                    {
+                        "name": "PEsubnet",
+                        "properties": {
+                            "addressPrefix": "10.2.2.0/24"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2018-11-01",
+            "name": "[concat('gears-azc-03l-web-', parameters('alias'))]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Web/serverfarms/', concat('gears-azc-03l-asp-', parameters('alias')))]"
+            ],
+            "tags": {},
+            "properties": {
+                "name": "[concat('gears-azc-03l-web-', parameters('alias'))]",
+                "siteConfig": {
+                    "appSettings": [],
+                    "metadata": [
+                        {
+                            "name": "CURRENT_STACK",
+                            "value": "dotnet"
+                        }
+                    ],
+                    "phpVersion": "OFF",
+                    "netFrameworkVersion": "v4.0",
+                    "alwaysOn": "true"
+                },
+                "serverFarmId": "[concat('/subscriptions/', subscription().subscriptionid,'/resourcegroups/', resourceGroup().name, '/providers/Microsoft.Web/serverfarms/', concat('gears-azc-03l-asp-', parameters('alias')))]",
+                "clientAffinityEnabled": true
+            }
+        },
+        {
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2018-11-01",
+            "name": "[concat('gears-azc-03l-asp-', parameters('alias'))]",
+            "location": "[parameters('location')]",
+            "dependsOn": [],
+            "tags": {},
+            "sku": {
+                "Tier": "Standard",
+                "Name": "S1"
+            },
+            "kind": "",
+            "properties": {
+                "name": "[concat('gears-azc-03l-asp-', parameters('alias'))]",
+                "workerSize": "0",
+                "workerSizeId": "0",
+                "numberOfWorkers": "1",
+                "zoneRedundant": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2018-11-01",
+            "name": "[concat('gears-azc-03l-function-', parameters('alias'))]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Web/serverfarms/', concat('gears-azc-03l-functionplan-', parameters('alias')))]",
+                "[concat('Microsoft.Storage/storageAccounts/', concat('azc03lstorage', parameters('alias')))]"
+            ],
+            "tags": {},
+            "kind": "functionapp",
+            "properties": {
+                "name": "[concat('gears-azc-03l-function-', parameters('alias'))]",
+                "siteConfig": {
+                    "appSettings": [
+                        {
+                            "name": "FUNCTIONS_EXTENSION_VERSION",
+                            "value": "~4"
+                        },
+                        {
+                            "name": "FUNCTIONS_WORKER_RUNTIME",
+                            "value": "dotnet"
+                        },
+                        {
+                            "name": "AzureWebJobsStorage",
+                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',concat('azc03lstorage', parameters('alias')),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', concat('azc03lstorage', parameters('alias'))), '2019-06-01').keys[0].value,';EndpointSuffix=','core.windows.net')]"
+                        },
+                        {
+                            "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',concat('azc03lstorage', parameters('alias')),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', concat('azc03lstorage', parameters('alias'))), '2019-06-01').keys[0].value,';EndpointSuffix=','core.windows.net')]"
+                        },
+                        {
+                            "name": "WEBSITE_CONTENTSHARE",
+                            "value": "[concat(toLower(concat('gears-azc-03l-function-', parameters('alias'))), 'b3d1')]"
+                        }
+                    ],
+                    "cors": {
+                        "allowedOrigins": [
+                            "https://ms.portal.azure.com"
+                        ]
+                    },
+                    "use32BitWorkerProcess": "true",
+                    "netFrameworkVersion": "v6.0"
+                },
+                "serverFarmId": "[concat('/subscriptions/', subscription().subscriptionid,'/resourcegroups/', resourceGroup().name, '/providers/Microsoft.Web/serverfarms/', concat('gears-azc-03l-functionplan-', parameters('alias')))]",
+                "clientAffinityEnabled": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2018-11-01",
+            "name": "[concat('gears-azc-03l-functionplan-', parameters('alias'))]",
+            "location": "[parameters('location')]",
+            "dependsOn": [],
+            "tags": {},
+            "sku": {
+                "Tier": "ElasticPremium",
+                "Name": "EP1"
+            },
+            "kind": "",
+            "properties": {
+                "name": "[concat('gears-azc-03l-functionplan-', parameters('alias'))]",
+                "workerSize": "3",
+                "workerSizeId": "3",
+                "numberOfWorkers": "1",
+                "maximumElasticWorkerCount": "20",
+                "zoneRedundant": false
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2019-06-01",
+            "name": "[concat('azc03lstorage', parameters('alias'))]",
+            "location": "[parameters('location')]",
+            "tags": {},
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "properties": {
+                "supportsHttpsTrafficOnly": true,
+                "minimumTlsVersion": "TLS1_2"
+            }
+        },
+        {
+            "type": "Microsoft.KeyVault/vaults",
+            "apiVersion": "2019-09-01",
+            "name": "[concat('azc-03l-kv-', parameters('alias'))]",
+            "location": "[parameters('location')]",
+            "dependsOn": [],
+            "tags": {},
+            "properties": {
+                "enabledForDeployment": "false",
+                "enabledForTemplateDeployment": "false",
+                "enabledForDiskEncryption": "false",
+                "enableRbacAuthorization": "false",
+                "accessPolicies": [
+                    {
+                        "objectId": "34eea8d1-7bb1-4886-a7fd-641873b0e3ca",
+                        "tenantId": "[subscription().tenantId]",
+                        "permissions": {
+                            "keys": [
+                                "Get",
+                                "List",
+                                "Update",
+                                "Create",
+                                "Import",
+                                "Delete",
+                                "Recover",
+                                "Backup",
+                                "Restore"
+                            ],
+                            "secrets": [
+                                "Get",
+                                "List",
+                                "Set",
+                                "Delete",
+                                "Recover",
+                                "Backup",
+                                "Restore"
+                            ],
+                            "certificates": [
+                                "Get",
+                                "List",
+                                "Update",
+                                "Create",
+                                "Import",
+                                "Delete",
+                                "Recover",
+                                "Backup",
+                                "Restore",
+                                "ManageContacts",
+                                "ManageIssuers",
+                                "GetIssuers",
+                                "ListIssuers",
+                                "SetIssuers",
+                                "DeleteIssuers"
+                            ]
+                        },
+                        "applicationId": ""
+                    }
+                ],
+                "tenantId": "[subscription().tenantId]",
+                "sku": {
+                    "name": "Standard",
+                    "family": "A"
+                },
+                "enableSoftDelete": "true",
+                "softDeleteRetentionInDays": "90",
+                "networkAcls": {
+                    "defaultAction": "allow",
+                    "bypass": "AzureServices",
+                    "ipRules": [],
+                    "virtualNetworkRules": []
+                }
+            }
+        },
+        {
+            "type": "Microsoft.DocumentDb/databaseAccounts",
+            "apiVersion": "2021-10-15-preview",
+            "name": "[concat('gears-azc-03l-cosmos-', parameters('alias'))]",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "defaultExperience": "Core (SQL)",
+                "hidden-cosmos-mmspecial": ""
+            },
+            "kind": "GlobalDocumentDB",
+            "properties": {
+                "databaseAccountOfferType": "Standard",
+                "locations": [
+                    {
+                        "id": "[concat('gears-azc-03l-cosmos-', parameters('alias'), '-', resourceGroup().location)]",
+                        "failoverPriority": 0,
+                        "locationName": "[resourceGroup().location]"
+                    }
+                ],
+                "backupPolicy": {
+                    "type": "Periodic",
+                    "periodicModeProperties": {
+                        "backupIntervalInMinutes": 240,
+                        "backupRetentionIntervalInHours": 8,
+                        "backupStorageRedundancy": "Geo"
+                    }
+                },
+                "isVirtualNetworkFilterEnabled": false,
+                "virtualNetworkRules": [],
+                "ipRules": [],
+                "dependsOn": [],
+                "enableMultipleWriteLocations": false,
+                "capabilities": [],
+                "enableFreeTier": false
+            }
+        }
+    ]
+}
