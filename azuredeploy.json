@@ -250,7 +250,8 @@
             "properties": {
                 "supportsHttpsTrafficOnly": true,
                 "minimumTlsVersion": "TLS1_2"
-            }
+            },
+            kind": "StorageV2"
         },
         {
             "type": "Microsoft.KeyVault/vaults",
