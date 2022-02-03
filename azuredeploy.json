@@ -94,7 +94,12 @@
             "properties": {
                 "name": "[concat('gears-azc-03l-web-', parameters('alias'))]",
                 "siteConfig": {
-                    "appSettings": [],
+                    "appSettings": [
+                        {
+                            "name": "FunctionURL",
+                            "value": "[concat('https://gears-azc-03l-function-', parameters('alias'), '.azurewebsites.net/api/Function1?code=eyUaIJ7T/mI4DTfAZhDtAKu2dauCSt60jw8EHck96t4aErBjLn0rXw==')]"
+                        }
+                    ],
                     "metadata": [
                         {
                             "name": "CURRENT_STACK",
@@ -146,7 +151,7 @@
                     "appSettings": [
                         {
                             "name": "FUNCTIONS_EXTENSION_VERSION",
-                            "value": "~4"
+                            "value": "~3"
                         },
                         {
                             "name": "FUNCTIONS_WORKER_RUNTIME",
@@ -163,6 +168,14 @@
                         {
                             "name": "WEBSITE_CONTENTSHARE",
                             "value": "[concat(toLower(concat('gears-azc-03l-function-', parameters('alias'))), 'b3d1')]"
+                        },
+                        {
+                            "name": "CosmosDBURI",
+                            "value": "[concat('https://gears-azc-03l-cosmos-', parameters('alias'), '.documents.azure.com:443/')]"
+                        },
+                        {
+                            "name": "CosmosDBAuthKey",
+                            "value": "3BC35OWMjvJzUCWbhkY8G67pBS9mFUfq2W373e33xUpojq6DsTSxUGPW1CsIsVCkuiYTtvRSuc40QVsELQUBXQ=="
                         }
                     ],
                     "cors": {
