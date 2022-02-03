@@ -115,7 +115,19 @@
                 },
                 "serverFarmId": "[concat('/subscriptions/', subscription().subscriptionid,'/resourcegroups/', resourceGroup().name, '/providers/Microsoft.Web/serverfarms/', concat('gears-azc-03l-asp-', parameters('alias')))]",
                 "clientAffinityEnabled": true
-            }
+            },
+            "resources": [
+                {
+                    "type": "Extensions",
+                     "apiVersion": "2020-06-01",
+                     "name": "MSDeploy",
+                     "dependsOn": [
+                        "[resourceId('Microsoft.Web/sites', concat('gears-azc-03l-web-', parameters('alias')))]"
+                      ],
+                      "properties": {
+                        "packageUri": "https://gearsazc03lprod.blob.core.windows.net/packages/webappprod.zip"                       
+                        }
+                }]
         },
         {
             "type": "Microsoft.Web/serverfarms",
@@ -195,16 +207,15 @@
             "resources": [
                 {
                     "type": "Extensions",
-                    "type": "Extensions",
-                      "apiVersion": "2020-06-01",
-                      "name": "MSDeploy",
-                      "dependsOn": [
+                     "apiVersion": "2020-06-01",
+                     "name": "MSDeploy",
+                     "dependsOn": [
                         "[resourceId('Microsoft.Web/sites', concat('gears-azc-03l-function-', parameters('alias')))]"
                       ],
                       "properties": {
                         "packageUri": "https://gearsazc03lprod.blob.core.windows.net/packages/functionappprod.zip"                       
                         }
-                }
+                }]
         },
         {
             "type": "Microsoft.Web/serverfarms",
