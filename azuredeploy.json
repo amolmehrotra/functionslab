@@ -8,6 +8,9 @@
         },
         "alias": {
             "type": "String"
+        },
+        "principalId": {
+            "type": "String"
         }
     },
     "variables": {},
@@ -239,7 +242,7 @@
                 "enableRbacAuthorization": "false",
                 "accessPolicies": [
                     {
-                        "objectId": "34eea8d1-7bb1-4886-a7fd-641873b0e3ca",
+                        "objectId": "[parameters('principalId')]",
                         "tenantId": "[subscription().tenantId]",
                         "permissions": {
                             "keys": [
