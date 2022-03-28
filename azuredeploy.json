@@ -137,8 +137,8 @@
             "dependsOn": [],
             "tags": {},
             "sku": {
-                "Tier": "Standard",
-                "Name": "P1"
+                "Tier": "PremiumV2",
+                "Name": "PV2_1"
             },
             "kind": "",
             "properties": {
