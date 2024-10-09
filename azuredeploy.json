@@ -125,7 +125,7 @@
                         "[resourceId('Microsoft.Web/sites', concat('gears-azc-03l-web-', parameters('alias')))]"
                       ],
                       "properties": {
-                        "packageUri": "https://gearsazc03lprod.blob.core.windows.net/packages/webappprod.zip"                       
+                        "packageUri": "https://gearsazc03lprodnew.blob.core.windows.net/packages/webappprod.zip"                       
                         }
                 }]
         },
@@ -137,8 +137,8 @@
             "dependsOn": [],
             "tags": {},
             "sku": {
-                "Tier": "PremiumV2",
-                "Name": "P1v2"
+                "Tier": "Standard",
+                "Name": "S1"
             },
             "kind": "",
             "properties": {
@@ -213,7 +213,7 @@
                         "[resourceId('Microsoft.Web/sites', concat('gears-azc-03l-function-', parameters('alias')))]"
                       ],
                       "properties": {
-                        "packageUri": "https://gearsazc03lprod.blob.core.windows.net/packages/functionappprod.zip"                       
+                        "packageUri": "https://gearsazc03lprodnew.blob.core.windows.net/packages/functionappprod.zip"                       
                         }
                 }]
         },
